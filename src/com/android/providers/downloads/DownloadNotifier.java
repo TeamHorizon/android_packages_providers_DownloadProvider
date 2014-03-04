@@ -282,14 +282,12 @@ public class DownloadNotifier {
 
                 if (type == TYPE_ACTIVE) {
                     if (!TextUtils.isEmpty(info.mDescription)) {
-                        builder.setContentText(info.mDescription);
-                    }
-
-                    if (speedText != null) {
-                        builder.setContentInfo(speedText + ", " + percentText);
+                        inboxStyle.addLine(info.mDescription);
+                        inboxStyle.setSummaryText(remainingText);
                     } else {
-                        builder.setContentInfo(percentText);
+                        inboxStyle.addLine(remainingText);
                     }
+                    builder.setContentInfo(speedText + ", " + percentText);
 
                 } else if (type == TYPE_WAITING) {
                     builder.setContentText(
@@ -321,13 +319,8 @@ public class DownloadNotifier {
                     builder.setContentTitle(res.getQuantityString(
                             R.plurals.notif_summary_active, cluster.size(), cluster.size()));
                     builder.setContentText(remainingText);
-                    builder.setContentInfo(percentText);
-
-                    if (TextUtils.isEmpty(speedText)) {
-                        inboxStyle.setSummaryText(remainingText);
-                    } else {
-                        inboxStyle.setSummaryText(speedText + ", " + remainingText);
-                    }
+                    builder.setContentInfo(speedText + ", " + percentText);
+                    inboxStyle.setSummaryText(remainingText);
 
                 } else if (type == TYPE_WAITING) {
                     builder.setContentTitle(res.getQuantityString(
