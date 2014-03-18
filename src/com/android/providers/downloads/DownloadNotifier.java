@@ -271,6 +271,7 @@ public class DownloadNotifier {
             }
 
             // Build titles and description
+            final Notification.InboxStyle inboxStyle = new Notification.InboxStyle(builder);
             final Notification notif;
             if (cluster.size() == 1) {
 
@@ -309,7 +310,6 @@ public class DownloadNotifier {
                 notif = builder.build();
 
             } else {
-                final Notification.InboxStyle inboxStyle = new Notification.InboxStyle(builder);
 
                 for (DownloadInfo info : cluster) {
                     inboxStyle.addLine(getDownloadTitle(res, info));
