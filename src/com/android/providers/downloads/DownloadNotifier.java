@@ -285,8 +285,10 @@ public class DownloadNotifier {
                     if (!TextUtils.isEmpty(info.mDescription)) {
                         inboxStyle.addLine(info.mDescription);
                         inboxStyle.setSummaryText(remainingText);
+                        builder.setContentText(remainingText);
                     } else {
-                        inboxStyle.addLine(remainingText);
+                        inboxStyle.setSummaryText(remainingText);
+                        builder.setContentText(remainingText);
                     }
                     builder.setContentInfo(speedText + ", " + percentText);
 
@@ -307,7 +309,7 @@ public class DownloadNotifier {
                     }
                 }
 
-                notif = builder.build();
+                notif = inboxStyle.build();
 
             } else {
 
