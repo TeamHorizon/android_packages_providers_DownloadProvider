@@ -70,10 +70,6 @@ public class DownloadNotifier {
     private static final int SPEED_MB = 1048576;
     private static final int SPEED_GB = 1073741824;
 
-    private static final int SPEED_KB = 1024;
-    private static final int SPEED_MB = 1048576;
-    private static final int SPEED_GB = 1073741824;
-
     private final Context mContext;
     private final NotificationManager mNotifManager;
 

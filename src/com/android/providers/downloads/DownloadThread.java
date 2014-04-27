@@ -847,11 +847,7 @@ public class DownloadThread implements Runnable {
 
         if (state.mContinuingDownload) {
             if (state.mHeaderETag != null) {
-<<<<<<< HEAD
-                if (!state.mHeaderETag.equals(CUSTOM_ETAG)) {
-=======
                 if (!state.mHeaderETag.equals(QRD_ETAG)) {
->>>>>>> bd60d73... [2/2] DownloadProvider: DownloadManager: add support pause/resume/stop notifications
                     conn.addRequestProperty("If-Match", state.mHeaderETag);
                 }
             }
