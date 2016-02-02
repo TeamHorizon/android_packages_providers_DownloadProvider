@@ -40,13 +40,10 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.LongSparseLongArray;
 
-import com.android.providers.downloads.R;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.HashMap;
@@ -94,13 +91,6 @@ public class DownloadNotifier {
      */
     @GuardedBy("mDownloadSpeed")
     private final LongSparseLongArray mDownloadTouch = new LongSparseLongArray();
-
-    /**
-     * Formatter for giving transfer speeds with maximum of one decimal places
-     */
-    private static final DecimalFormat mFormatter = new DecimalFormat("#.#");
-
-    private static final String SPEED_PLACEHOLDER = "%s %cB/s";
 
     public DownloadNotifier(Context context) {
         mContext = context;
@@ -221,7 +211,6 @@ public class DownloadNotifier {
             // Calculate and show progress
             String remainingText = null;
             String percentText = null;
-            String speedText = null;
             if (type == TYPE_ACTIVE) {
                 long current = 0;
                 long total = 0;
@@ -241,30 +230,6 @@ public class DownloadNotifier {
                             NumberFormat.getPercentInstance().format((double) current / total);
 
                     if (speed > 0) {
-                        // Decide prefix character for speed string
-                        char preFix;
-                        double speedNormalized = speed;
-
-                        if (speed < SPEED_KB) {
-                            preFix = '\0';
-                        } else if (speed < SPEED_MB) {
-                            preFix = (res.getString(R.string.kilo_bytes)).charAt(0);
-                            speedNormalized /= SPEED_KB;
-                        } else if (speed < SPEED_GB) {
-                            preFix = (res.getString(R.string.mega_bytes)).charAt(0);
-                            speedNormalized /= SPEED_MB;
-                        } else {
-                            preFix = (res.getString(R.string.giga_bytes)).charAt(0);
-                            speedNormalized /= SPEED_GB;
-                        }
-
-                        // Format the String
-                        speedText = String.format(
-                            SPEED_PLACEHOLDER,
-                            mFormatter.format(speedNormalized).toString(),
-                            preFix
-                        );
-
                         final long remainingMillis = ((total - current) * 1000) / speed;
                         remainingText = res.getString(R.string.download_remaining,
                                 DateUtils.formatDuration(remainingMillis));
@@ -280,31 +245,17 @@ public class DownloadNotifier {
             // Build titles and description
             final Notification notif;
             if (cluster.size() == 1) {
-                final Notification.InboxStyle inboxStyle = new Notification.InboxStyle(builder);
-
                 final DownloadInfo info = cluster.iterator().next();
 
                 builder.setContentTitle(getDownloadTitle(res, info));
 
-                String contentText = null;
-
-                if (!TextUtils.isEmpty(info.mDescription)) {
-                    inboxStyle.addLine(info.mDescription);
-                } else if (!TextUtils.isEmpty(info.mPackage)) {
-                    final PackageManager pm = mContext.getApplicationContext().getPackageManager();
-                    ApplicationInfo ai;
-                    try {
-                        ai = pm.getApplicationInfo(info.mPackage, 0);
-                    } catch (final PackageManager.NameNotFoundException e) {
-                        ai = null;
-                    }
-                    final String packageName = (String) (ai != null ? pm.getApplicationLabel(ai) : "(unknown)");
-                    if(!TextUtils.isEmpty(packageName)) inboxStyle.addLine(packageName);
-                }
-
                 if (type == TYPE_ACTIVE) {
-                    contentText = remainingText;
-                    builder.setContentInfo(speedText + ", " + percentText);
+                    if (!TextUtils.isEmpty(info.mDescription)) {
+                        builder.setContentText(info.mDescription);
+                    } else {
+                        builder.setContentText(remainingText);
+                    }
+                    builder.setContentInfo(percentText);
 
                 } else if (type == TYPE_WAITING) {
                     contentText = res.getString(R.string.notification_need_wifi_for_size);
@@ -317,9 +268,7 @@ public class DownloadNotifier {
                     }
                 }
 
-                inboxStyle.setSummaryText(contentText);
-                builder.setContentText(contentText);
-                notif = inboxStyle.build();
+                notif = builder.build();
 
             } else {
                 final Notification.InboxStyle inboxStyle = new Notification.InboxStyle(builder);
